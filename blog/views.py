@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import BlogPost, Category, Newsletter
+from .models import BlogPost, Category, Newsletter,ContactMessage
 
 from django.core.paginator import Paginator
 
@@ -72,3 +72,20 @@ def contact(request):
     return render(request, 'blog/contact.html', {'categories': categories})
 
 
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        
+        # Save to database
+        ContactMessage.objects.create(
+            name=name,
+            email=email,
+            message=message
+        )
+        
+        messages.success(request, 'Thank you! Your message has been sent successfully. I will get back to you soon!')
+        return redirect('contact')
+    
+    return render(request, 'blog/contact.html')

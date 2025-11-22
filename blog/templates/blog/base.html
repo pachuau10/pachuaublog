@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-L7xj5C6vf+...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="icon" type="image/jpg" href="https://res.cloudinary.com/dpsmjarzo/image/upload/v1763828204/android-chrome-512x512_zm1p4k.png">    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-L7xj5C6vf+...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
      <title>{% block title %}Chhohreivung    {% endblock %}</title>
 
 
@@ -68,19 +69,26 @@
             font-weight: bold;
             text-decoration: none;
         }
+.logo-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    border-radius: 50%;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    object-fit: contain;
+}
 
-        .logo-icon {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            border-radius: 50%;
-            margin-right: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-        }
+.logo-icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
         .logo-text {
             color: #ff6b35;
@@ -549,6 +557,23 @@ footer .social-icons a {
 footer .social-icons a:hover {
     color: #ff9900; /* Highlight on hover */
 }
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 0 20px 0;
+    display: block;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    border: 4px solid rgba(255, 107, 53, 0.3);
+    overflow: hidden;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
         {% block extra_css %}{% endblock %}
     </style>
@@ -556,8 +581,8 @@ footer .social-icons a:hover {
 <body>
     <header>
         <a href="{% url 'home' %}" class="logo">
-            <div class="logo-icon">👤</div>
-            <span class="logo-text">PACH</span><span class="logo-text-black">UAU</span>
+      <div class="logo-icon"><img src="https://res.cloudinary.com/dpsmjarzo/image/upload/v1763827996/fo3x3mj4dop3zwkg6aze.jpg"></div>
+            <span class="logo-text">CHHO</span><span class="logo-text-black">HREIVUNG</span>
         </a>
         <nav>
             <a href="{% url 'home' %}">Home</a>
@@ -568,7 +593,7 @@ footer .social-icons a:hover {
                 </button>
                 <div class="dropdown-content" id="categoryDropdown">
                     {% for category in categories %}
-                    <a href="?category={{ category.slug }}">{{ category.name }}</a>
+                    <a href="{% url 'home' %}?category={{ category.slug }}">{{ category.name }}</a>
                     {% endfor %}
                 </div>
             </div>
@@ -602,14 +627,30 @@ footer .social-icons a:hover {
                 </button>
                 <div class="mobile-category-content" id="mobileCategoryContent">
                     {% for category in categories %}
-                    <a href="?category={{ category.slug }}" onclick="toggleMobileMenu()">{{ category.name }}</a>
+                    <a href="{% url 'home' %}?category={{ category.slug }}" onclick="toggleMobileMenu()">{{ category.name }}</a>
                     {% endfor %}
                 </div>
             </div>
             
             <a href="{% url 'contact' %}" onclick="toggleMobileMenu()">Contact Me</a>
-            <button href="https://youtube.com/@pachuau_10" class="mobile-subscribe-btn">Subscribe ▶</button>
-        </div>
+<a href="https://youtube.com/@pachuau_10" class="mobile-subscribe-btn" target="_blank" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+"
+onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 0, 0, 0.4)'"
+onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 0, 0, 0.3)'"
+>Subscribe ▶</a>        </div>
     </div>
 
     <!-- Messages -->
@@ -631,7 +672,9 @@ footer .social-icons a:hover {
         <div class="footer-content">
             <div class="footer-section">
                 <div class="logo" style="margin-bottom: 20px;">
-                    <div class="logo-icon">👤</div>
+                            <div class="profile-image">
+            <img src="{% static 'images/profileduha.jpg' %}" alt="PC Ramduhawma">
+        </div>
                     <span class="logo-text">PACH</span><span style="color: white;">UAU</span>
                 </div>
                 <p>Learn coding with fun! Pachuau provides high-quality tutorials on React, Angular, React Native, and modern web development.</p>
@@ -658,7 +701,7 @@ footer .social-icons a:hover {
                 <h3>Categories</h3>
                 <ul class="footer-links">
                     {% for category in categories %}
-                    <li><a href="?category={{ category.slug }}">{{ category.name }}</a></li>
+                    <li><a href="{% url 'home' %}?category={{ category.slug }}">{{ category.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>

@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
 
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -14,6 +16,8 @@ class Category(models.Model):
     
     def __str__(self):
         return self.name
+    
+
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
@@ -22,6 +26,7 @@ class BlogPost(models.Model):
     content = RichTextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
     image = CloudinaryField('image', blank=True, null=True)  # Cloudinary will handle
+    author_image = CloudinaryField('author_image', blank=True, null=True)
     author = models.CharField(max_length=100, default="Pachuau")
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -40,3 +45,17 @@ class Newsletter(models.Model):
     def __str__(self):
         return self.email
 
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)  # Track if you've read it
+    
+    def __str__(self):
+        return f"{self.name} - {self.email}"
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Contact Message'
+        verbose_name_plural = 'Contact Messages'

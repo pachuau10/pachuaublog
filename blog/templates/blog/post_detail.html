@@ -1,201 +1,502 @@
 {% extends "blog/base.html" %}
 {% load cloudinary %}
+{% load static %}
 
 {% block og_title %}{{ post.title }} | PC Ramduhawma{% endblock %}
 
 {% block extra_css %}
 <style>
 
-/* ---------- HERO SECTION (FIXED) ---------- */
-/* HERO SECTION */
-/* HERO IMAGE WRAPPER */
+/* ---------- HERO SECTION ---------- */
 .post-hero {
-    width: 30%;
-    max-width: 900px;          /* limit size on desktop */
-    height: 30%;
-    margin: 30px auto;         /* center */
-    border-radius: 20px;
+    width: 100%;
+    max-width: 100%;
+    height: 350px;
+    margin-bottom: 30px;
+    border-radius: 15px 15px 0 0;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f5f5f5;
-    padding: 20px;             /* makes image look cleaner */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* IMAGE STYLE */
 .post-hero img {
     width: 100%;
-    max-width: 550px;          /* maximum desktop size */
-    height: auto;
-    object-fit: contain;       /* keeps full image visible */
+    height: 100%;
+    object-fit: cover;
     display: block;
-    margin: 0 auto;
 }
 
-/* MOBILE FIX */
+/* Placeholder for posts without images */
+.post-hero > div {
+    font-size: 100px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
 @media(max-width: 768px) {
     .post-hero {
-        max-width: 100%;
-        padding: 10px;
+        height: 250px;
     }
 
-    .post-hero img {
-        max-width: 80%;        /* prevents looking too big or too small */
+    .post-hero > div {
+        font-size: 70px;
     }
 }
 
-/* ---------- REST OF PAGE ---------- */
-
+/* ---------- POST CONTAINER ---------- */
 .post-container {
-    padding: 30px 5%;
-    max-width: 900px;
-    margin: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
+.post-content-wrapper {
+    background: #fff;
+    padding: 0;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.post-details {
+    padding: 40px;
+}
+
+/* ---------- CATEGORY BADGE ---------- */
 .post-category {
     display: inline-block;
-    padding: 8px 18px;
+    padding: 10px 24px;
     font-size: 14px;
-    font-weight: bold;
-    background-color: #ff6b35;
+    font-weight: 600;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
     color: white;
-    border-radius: 20px;
+    border-radius: 25px;
     margin-bottom: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
+/* ---------- POST TITLE ---------- */
 .post-title {
-    font-size: 36px;
-    font-weight: bold;
-    color: #222;
-    margin-bottom: 15px;
+    font-size: 42px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 25px;
     line-height: 1.3;
+    letter-spacing: -0.5px;
 }
 
+/* ---------- META INFO ---------- */
 .post-meta {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 35px;
+    gap: 15px;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .author-avatar {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: #ff6b35;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
+.post-meta > div > div:first-child {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 16px;
+}
+
+.post-meta > div > div:last-child {
+    color: #999;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+/* ---------- POST CONTENT ---------- */
 .post-content {
     font-size: 18px;
     line-height: 1.8;
     color: #444;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
+.post-content p {
+    margin: 20px 0;
+    line-height: 1.8;
+}
+
+/* Headings */
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+    margin: 35px 0 20px;
+    color: #1a1a2e;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.post-content h1 {
+    font-size: 32px;
+    border-bottom: 3px solid #ff6b35;
+    padding-bottom: 10px;
+}
+
+.post-content h2 {
+    font-size: 28px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+.post-content h3 {
+    font-size: 24px;
+}
+
+.post-content h4 {
+    font-size: 20px;
+}
+
+/* Images */
 .post-content img {
     max-width: 100%;
-    border-radius: 10px;
-    margin: 20px 0;
+    height: auto;
+    border-radius: 15px;
+    margin: 30px auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    display: block;
 }
 
+/* Links */
+.post-content a {
+    color: #ff6b35;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.post-content a:hover {
+    border-bottom-color: #ff6b35;
+    color: #f7931e;
+}
+
+/* Lists */
+.post-content ul,
+.post-content ol {
+    margin: 25px 0;
+    padding-left: 30px;
+}
+
+.post-content li {
+    margin: 12px 0;
+    line-height: 1.8;
+}
+
+.post-content ul li {
+    list-style-type: none;
+    position: relative;
+    padding-left: 10px;
+}
+
+.post-content ul li::before {
+    content: "▸";
+    color: #ff6b35;
+    font-weight: bold;
+    position: absolute;
+    left: -20px;
+}
+
+/* Blockquotes */
+.post-content blockquote {
+    margin: 30px 0;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 5px solid #ff6b35;
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    color: #555;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.post-content blockquote p {
+    margin: 10px 0;
+}
+
+/* Code Blocks */
+.post-content code {
+    background: #f4f4f4;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 16px;
+    color: #e74c3c;
+    border: 1px solid #e0e0e0;
+}
+
+.post-content pre {
+    background: #1a1a2e;
+    color: #f8f9fa;
+    padding: 25px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 30px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border: 1px solid #2d3561;
+}
+
+.post-content pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: 15px;
+}
+
+/* Tables */
+.post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.post-content table th,
+.post-content table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.post-content table th {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.post-content table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Horizontal Rule */
+.post-content hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+    margin: 40px 0;
+}
+
+/* Strong and Em */
+.post-content strong {
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+.post-content em {
+    color: #555;
+}
+
+/* ---------- FOOTER ---------- */
 .post-footer {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #eee;
+    margin-top: 60px;
+    padding: 40px 0;
+    border-top: 2px solid #f0f0f0;
     text-align: center;
 }
 
 .back-btn {
-    padding: 12px 25px;
-    background: #ff6b35;
-    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 35px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    border-radius: 30px;
     color: white;
     text-decoration: none;
-    font-weight: bold;
-    transition: 0.3s;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
 .back-btn:hover {
-    background: #ff7f40;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
 }
 
-/* mobile typography */
-@media(max-width: 768px){
+/* ---------- MOBILE RESPONSIVE ---------- */
+@media(max-width: 768px) {
+    .post-container {
+        padding: 30px 5%;
+    }
+
     .post-title {
+        font-size: 28px;
+    }
+
+    .post-content {
+        font-size: 16px;
+    }
+
+    .post-content h1 {
         font-size: 26px;
+    }
+
+    .post-content h2 {
+        font-size: 22px;
+    }
+
+    .post-content h3 {
+        font-size: 20px;
+    }
+
+    .post-content h4 {
+        font-size: 18px;
+    }
+
+    .post-content pre {
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    .post-content blockquote {
+        padding: 15px 20px;
+    }
+
+    .post-content table {
+        font-size: 14px;
+    }
+
+    .post-content table th,
+    .post-content table td {
+        padding: 10px;
+    }
+
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .back-btn {
+        padding: 12px 25px;
+        font-size: 15px;
     }
 }
 
-.post-content h1, .post-content h2, .post-content h3 {
-    margin: 15px 0;
+/* ---------- SMOOTH ANIMATIONS ---------- */
+.post-hero,
+.post-category,
+.post-title,
+.post-meta,
+.post-content {
+    animation: fadeInUp 0.6s ease-out;
 }
 
-.post-content p {
-    margin: 10px 0;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.post-content a {
-    color: #007bff;
-    text-decoration: underline;
+.post-category {
+    animation-delay: 0.1s;
 }
 
-.post-content ul, .post-content ol {
-    margin-left: 20px;
+.post-title {
+    animation-delay: 0.2s;
 }
 
+.post-meta {
+    animation-delay: 0.3s;
+}
+
+.post-content {
+    animation-delay: 0.4s;
+    
+}
+.author-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="post-hero">
-    {% if post.image %}
-        <img src="{{ post.image.url }}" alt="{{ post.title }}">
-    {% else %}
-        <div style="font-size: 80px; color: white;">
-            {% if "React" in post.category.name %}⚛️
-            {% elif "Angular" in post.category.name %}🅰️
-            {% elif "JavaScript" in post.category.name %}JS
-            {% elif "UI" in post.category.name %}🎨
-            {% else %}💻{% endif %}
-        </div>
-    {% endif %}
-</div>
-
 <div class="post-container">
-    
-    <span class="post-category">{{ post.category.name }}</span>
+    <div class="post-content-wrapper">
+        
+        <div class="post-hero">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{{ post.title }}">
+            {% else %}
+                <div>
+                    {% if "React" in post.category.name %}⚛️
+                    {% elif "Angular" in post.category.name %}🅰️
+                    {% elif "JavaScript" in post.category.name %}JS
+                    {% elif "UI" in post.category.name %}🎨
+                    {% else %}💻{% endif %}
+                </div>
+            {% endif %}
+        </div>
 
-    <h1 class="post-title">{{ post.title }}</h1>
+        <div class="post-details">
+            <span class="post-category">{{ post.category.name }}</span>
 
-    <div class="post-meta">
-        <div class="author-avatar">{{ post.author|slice:":1"|upper }}</div>
-        <div>
-            <div><strong>{{ post.author }}</strong></div>
-            <div style="color:#777;">{{ post.created_at|date:"d M Y" }}</div>
+            <h1 class="post-title">{{ post.title }}</h1>
+
+            <div class="post-meta">
+                <div class="author-avatar">
+        {% if post.author_image %}
+            <img src="{{ post.author_image.url }}" alt="{{ post.author }}">
+        {% else %}
+            <img src="https://res.cloudinary.com/dpsmjarzo/image/upload/v1763828299/profileduha_m0rlty.jpg" alt="{{ post.author }}">
+        {% endif %}                </div>
+                <div>
+                    <div><strong>{{ post.author }}</strong></div>
+                    <div style="color:#777;">{{ post.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+
+            <div class="post-content">
+                {{ post.content|safe }}
+            </div>
         </div>
     </div>
-
-<div class="post-content">
-    
-    {{ post.content|safe }}
-</div>
-
-</div>
-
 
     <div class="post-footer">
         <a href="{% url 'home' %}" class="back-btn">⬅ Back to Home</a>
     </div>
-
 </div>
-
 
 {% endblock %}
