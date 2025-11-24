@@ -1,12 +1,7 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import BlogPost, Category, Newsletter,ContactMessage
-
-from django.core.paginator import Paginator
+from .models import BlogPost, Category, Newsletter, ContactMessage
 
 def home(request):
     posts = BlogPost.objects.filter(is_published=True)
@@ -20,20 +15,19 @@ def home(request):
         posts = posts.filter(title__icontains=search_query) | posts.filter(description__icontains=search_query)
 
     # Pagination
-    paginator = Paginator(posts, 6)  # 6 posts per page
+    paginator = Paginator(posts, 6)
     page_number = request.GET.get('page')
-    posts = paginator.get_page(page_number)  # <--- now posts is a Page object
+    posts = paginator.get_page(page_number)
 
     categories = Category.objects.all()
 
     context = {
-        'posts': posts,  # template expects 'posts' for pagination
+        'posts': posts,
         'categories': categories,
         'selected_category': category_slug,
         'search_query': search_query,
     }
     return render(request, 'blog/home.html', context)
-
 
 
 def post_detail(request, slug):
@@ -43,13 +37,16 @@ def post_detail(request, slug):
         is_published=True
     ).exclude(id=post.id)[:3]
     
+    categories = Category.objects.all()
+    
     context = {
         'post': post,
         'related_posts': related_posts,
         'categories': categories,
     }
-    categories = Category.objects.all()
+    
     return render(request, 'blog/post_detail.html', context)
+
 
 def subscribe_newsletter(request):
     if request.method == 'POST':
@@ -69,12 +66,10 @@ def about(request):
     categories = Category.objects.all()
     return render(request, 'blog/about.html', {'categories': categories})
 
+
 def contact(request):
     categories = Category.objects.all()
-    return render(request, 'blog/contact.html', {'categories': categories})
-
-
-def contact(request):
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
@@ -89,7 +84,5 @@ def contact(request):
         
         messages.success(request, 'Thank you! Your message has been sent successfully. I will get back to you soon!')
         return redirect('contact')
-    categories = Category.objects.all()
-
     
-    return render(request, 'blog/contact.html',{'categories': categories})
+    return render(request, 'blog/contact.html', {'categories': categories})
