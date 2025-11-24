@@ -46,9 +46,10 @@ def post_detail(request, slug):
     context = {
         'post': post,
         'related_posts': related_posts,
+        'categories': categories,
     }
     categories = Category.objects.all()
-    return render(request, 'blog/post_detail.html', context,{'categories': categories})
+    return render(request, 'blog/post_detail.html', context)
 
 def subscribe_newsletter(request):
     if request.method == 'POST':
