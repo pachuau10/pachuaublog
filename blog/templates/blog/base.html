@@ -6,6 +6,17 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4913010328689287"
      crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
 <link rel="icon" type="image/jpg" href="https://res.cloudinary.com/dpsmjarzo/image/upload/v1763828204/android-chrome-512x512_zm1p4k.png">    
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-L7xj5C6vf+...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
      <title>{% block title %}Chhohreivung    {% endblock %}</title>
@@ -797,28 +808,26 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         }
     }
     </script>
+{% block extra_js %}
+{% endblock %}
 <script>
-    // Interactive Code Runner for Blog Posts
+    // FINAL FIX: Uses CodeMirror for editable, colored code blocks.
+    
     document.addEventListener('DOMContentLoaded', function() {
-        // Find all code blocks created by CKEditor's CodeSnippet plugin
         const codeBlocks = document.querySelectorAll('pre code[class*="language-"]');
         
-        console.log('Found code blocks:', codeBlocks.length);
-        
-        if (codeBlocks.length === 0) {
-            console.log('No code blocks found with language class');
-            return;
-        }
+        if (codeBlocks.length === 0) return;
         
         codeBlocks.forEach((codeBlock, index) => {
             const pre = codeBlock.parentElement;
             const language = getLanguageFromClass(codeBlock.className);
             
-            console.log('Code block', index, 'language:', language);
-            
-            // Only add run button for supported languages
             if (['python', 'javascript', 'js', 'html', 'css'].includes(language)) {
-                addRunButton(pre, codeBlock, language, index);
+                // 1. Initialize CodeMirror, hide the original <pre>
+                const editor = initializeCodeMirror(pre, codeBlock, language);
+                
+                // 2. Add the header/buttons around the new editor
+                addCodeRunnerControls(pre, editor, language, index);
             }
         });
     });
@@ -828,14 +837,43 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         if (!match) return 'text';
         
         const lang = match[1].toLowerCase();
-        // Map common variations
         if (lang === 'js') return 'javascript';
         if (lang === 'py') return 'python';
+        if (lang === 'html') return 'xml'; // Use CodeMirror's mode name
         return lang;
     }
 
-    function addRunButton(pre, codeBlock, language, index) {
-        // Create wrapper for code block with controls
+    function initializeCodeMirror(pre, codeBlock, language) {
+        const initialCode = codeBlock.textContent;
+
+        // 1. Create a hidden textarea (CodeMirror needs this)
+        const textarea = document.createElement('textarea');
+        textarea.value = initialCode;
+        textarea.style.display = 'none';
+
+        // 2. Insert the textarea before the original <pre> block
+        pre.parentNode.insertBefore(textarea, pre);
+
+        // 3. Initialize CodeMirror (This adds the coloring and editing functionality)
+        const editor = CodeMirror.fromTextArea(textarea, {
+            lineNumbers: true,
+            mode: language,
+            theme: 'dracula', // MUST match the loaded theme CSS
+            indentUnit: 4,
+            tabSize: 4,
+            autofocus: false 
+        });
+
+        // 4. Hide the original <pre> block
+        pre.style.display = 'none';
+        
+        return editor;
+    }
+
+    function addCodeRunnerControls(pre, editor, language, index) {
+        const editorWrapper = editor.getWrapperElement();
+        
+        // 1. Create the top-level wrapper
         const wrapper = document.createElement('div');
         wrapper.className = 'code-runner-wrapper';
         wrapper.style.cssText = `
@@ -846,82 +884,10 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         `;
         
-        // Create contenteditable div for code editing
-        const editorDiv = document.createElement('div');
-        editorDiv.contentEditable = 'true';
-        editorDiv.spellcheck = false;
-        editorDiv.className = `language-${language}`;
-        editorDiv.textContent = codeBlock.textContent;
-        editorDiv.style.cssText = `
-            width: 100%;
-            min-height: 80px;
-            max-height: 600px;
-            padding: 15px;
-            background: #2d2d30;
-            color: #d4d4d4;
-            border: none;
-            font-family: 'Courier New', Consolas, monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            outline: none;
-            tab-size: 4;
-            overflow-y: auto;
-            white-space: pre;
-            overflow-wrap: normal;
-        `;
-
-        // Apply initial syntax highlighting
-        if (window.Prism) {
-            Prism.highlightElement(editorDiv);
-        }
+        // 2. Move the CodeMirror editor element into the new wrapper
+        editorWrapper.parentNode.insertBefore(wrapper, editorWrapper);
         
-        // Update syntax highlighting on input
-        let highlightTimeout;
-        editorDiv.addEventListener('input', function() {
-            clearTimeout(highlightTimeout);
-            highlightTimeout = setTimeout(() => {
-                const selection = saveSelection(editorDiv);
-                const text = editorDiv.textContent;
-                editorDiv.textContent = text;
-                if (window.Prism) {
-                    Prism.highlightElement(editorDiv);
-                }
-                restoreSelection(editorDiv, selection);
-            }, 300);
-        });
-        
-        // Add smart editor features
-        editorDiv.addEventListener('keydown', function(e) {
-            // Tab key - insert 4 spaces
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                document.execCommand('insertText', false, '    ');
-            }
-            
-            // Enter key - auto-indent
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const textBeforeCursor = range.startContainer.textContent.substring(0, range.startOffset);
-                const lines = this.textContent.substring(0, getCaretPosition(this)).split('\n');
-                const currentLine = lines[lines.length - 1];
-                
-                // Count leading spaces for indentation
-                const indent = currentLine.match(/^\s*/)[0];
-                
-                // Check if line ends with : or { for extra indent
-                const needsExtraIndent = currentLine.trim().endsWith(':') || 
-                                        currentLine.trim().endsWith('{') ||
-                                        currentLine.trim().endsWith('[') ||
-                                        currentLine.trim().endsWith('(');
-                
-                const newIndent = needsExtraIndent ? indent + '    ' : indent;
-                document.execCommand('insertText', false, '\n' + newIndent);
-            }
-        });
-        
-        // Create header with language badge and buttons
+        // 3. Create header and buttons (styling is the same as before)
         const header = document.createElement('div');
         header.className = 'code-runner-header';
         header.style.cssText = `
@@ -952,39 +918,32 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
             gap: 10px;
         `;
         
-        // Copy button
+        const baseButtonStyle = `
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        `;
+
         const copyButton = document.createElement('button');
         copyButton.innerHTML = '📋 Copy';
         copyButton.className = 'copy-code-btn';
-        copyButton.style.cssText = `
+        copyButton.style.cssText = baseButtonStyle + `
             background: rgba(255,255,255,0.9);
             color: #667eea;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s;
         `;
         
-        // Run button
         const runButton = document.createElement('button');
         runButton.innerHTML = '▶ Run Code';
         runButton.className = 'run-code-btn';
-        runButton.style.cssText = `
+        runButton.style.cssText = baseButtonStyle + `
             background: white;
             color: #667eea;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s;
         `;
         
-        // Button hover effects
         [copyButton, runButton].forEach(btn => {
             btn.onmouseover = () => btn.style.transform = 'scale(1.05)';
             btn.onmouseout = () => btn.style.transform = 'scale(1)';
@@ -1012,82 +971,26 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
             border-top: 2px solid #667eea;
         `;
         outputDiv.textContent = 'Click "Run Code" to see output...';
-        
-        // Wrap everything
-        pre.parentNode.insertBefore(wrapper, pre);
+
+        // 4. Assemble the DOM structure
         wrapper.appendChild(header);
-        wrapper.appendChild(editorDiv);
+        wrapper.appendChild(editorWrapper); // The CodeMirror editor
         wrapper.appendChild(outputDiv);
-        pre.style.display = 'none';  // Hide original pre tag
         
-        // Add click handlers
+        // 5. Add click handlers: Uses editor.getValue()
         copyButton.addEventListener('click', () => {
-            copyToClipboard(editorDiv.textContent, copyButton);
+            copyToClipboard(editor.getValue(), copyButton); 
         });
         
         runButton.addEventListener('click', () => {
-            runCode(editorDiv.textContent, language, outputDiv, runButton);
+            runCode(editor.getValue(), language, outputDiv, runButton);
         });
-    }
-
-    // Helper functions for cursor position
-    function saveSelection(el) {
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            return {
-                start: getCaretPosition(el),
-                end: getCaretPosition(el)
-            };
-        }
-        return { start: 0, end: 0 };
-    }
-
-    function restoreSelection(el, savedSel) {
-        const charIndex = savedSel.start;
-        const range = document.createRange();
-        const sel = window.getSelection();
         
-        let nodeStack = [el];
-        let node, foundStart = false;
-        let charCount = 0;
-
-        while (!foundStart && (node = nodeStack.pop())) {
-            if (node.nodeType === 3) {
-                const nextCharCount = charCount + node.length;
-                if (charIndex >= charCount && charIndex <= nextCharCount) {
-                    range.setStart(node, charIndex - charCount);
-                    range.setEnd(node, charIndex - charCount);
-                    foundStart = true;
-                }
-                charCount = nextCharCount;
-            } else {
-                let i = node.childNodes.length;
-                while (i--) {
-                    nodeStack.push(node.childNodes[i]);
-                }
-            }
-        }
-
-        sel.removeAllRanges();
-        sel.addRange(range);
+        // Ensure CodeMirror refreshes its size
+        editor.refresh();
     }
 
-    function getCaretPosition(element) {
-        let caretOffset = 0;
-        const selection = window.getSelection();
-        
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const preCaretRange = range.cloneRange();
-            preCaretRange.selectNodeContents(element);
-            preCaretRange.setEnd(range.endContainer, range.endOffset);
-            caretOffset = preCaretRange.toString().length;
-        }
-        
-        return caretOffset;
-    }
-
+    // --- Utility Functions (Copy/Run Code) --- (Not changed)
     function copyToClipboard(text, button) {
         navigator.clipboard.writeText(text).then(() => {
             const originalText = button.innerHTML;
@@ -1143,21 +1046,12 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
                 })
             });
             
-            if (!response.ok) {
-                throw new Error('Failed to execute Python code');
-            }
+            if (!response.ok) throw new Error('Failed to execute Python code');
             
             const result = await response.json();
-            outputDiv.style.color = '#4caf50';
+            outputDiv.style.color = result.run.stderr ? '#ff9800' : '#4caf50';
+            outputDiv.textContent = result.run.output || result.run.stderr || 'Code executed successfully (no output)';
             
-            if (result.run.output) {
-                outputDiv.textContent = result.run.output;
-            } else if (result.run.stderr) {
-                outputDiv.style.color = '#ff9800';
-                outputDiv.textContent = result.run.stderr;
-            } else {
-                outputDiv.textContent = 'Code executed successfully (no output)';
-            }
         } catch (error) {
             outputDiv.style.color = '#f44336';
             outputDiv.textContent = `Error: ${error.message}`;
@@ -1170,19 +1064,9 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         const originalError = console.error;
         const originalWarn = console.warn;
         
-        console.log = (...args) => {
-            logs.push(args.map(arg => 
-                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-            ).join(' '));
-        };
-        
-        console.error = (...args) => {
-            logs.push('❌ ERROR: ' + args.join(' '));
-        };
-        
-        console.warn = (...args) => {
-            logs.push('⚠️  WARNING: ' + args.join(' '));
-        };
+        console.log = (...args) => { logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')); };
+        console.error = (...args) => { logs.push('❌ ERROR: ' + args.join(' ')); };
+        console.warn = (...args) => { logs.push('⚠️ WARNING: ' + args.join(' ')); };
         
         try {
             eval(code);
@@ -1205,13 +1089,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         outputDiv.style.maxHeight = '500px';
         
         const iframe = document.createElement('iframe');
-        iframe.style.cssText = `
-            width: 100%;
-            height: 400px;
-            border: none;
-            background: white;
-        `;
-        
+        iframe.style.cssText = `width: 100%; height: 400px; border: none; background: white;`;
         iframe.sandbox = 'allow-scripts allow-same-origin';
         
         outputDiv.innerHTML = '';
@@ -1223,152 +1101,62 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         iframeDoc.close();
     }
 
-    // Add custom scrollbar styles and Prism CSS
+    // --- Final CSS Style Fix (Guarantees visible height and coloring) ---
     const style = document.createElement('style');
     style.textContent = `
-        /* Prism Tomorrow Night theme - syntax highlighting colors */
-        code[class*="language-"],
-        pre[class*="language-"],
-        div[class*="language-"] {
-            color: #ccc;
-            background: none;
-            font-family: 'Courier New', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-            text-align: left;
-            white-space: pre;
-            word-spacing: normal;
-            word-break: normal;
-            word-wrap: normal;
-            line-height: 1.5;
-            tab-size: 4;
-        }
+        /* Custom Scrollbar Styles */
+        .code-output::-webkit-scrollbar { width: 8px; }
+        .code-output::-webkit-scrollbar-track { background: #2d2d2d; }
+        .code-output::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        .code-output::-webkit-scrollbar-thumb:hover { background: #764ba2; }
 
-        .token.comment,
-        .token.block-comment,
-        .token.prolog,
-        .token.doctype,
-        .token.cdata {
-            color: #999;
-        }
-
-        .token.punctuation {
-            color: #ccc;
-        }
-
-        .token.tag,
-        .token.attr-name,
-        .token.namespace,
-        .token.deleted {
-            color: #e2777a;
-        }
-
-        .token.function-name {
-            color: #6196cc;
-        }
-
-        .token.boolean,
-        .token.number,
-        .token.function {
-            color: #f08d49;
-        }
-
-        .token.property,
-        .token.class-name,
-        .token.constant,
-        .token.symbol {
-            color: #f8c555;
-        }
-
-        .token.selector,
-        .token.important,
-        .token.atrule,
-        .token.keyword,
-        .token.builtin {
-            color: #cc99cd;
-        }
-
-        .token.string,
-        .token.char,
-        .token.attr-value,
-        .token.regex,
-        .token.variable {
-            color: #7ec699;
-        }
-
-        .token.operator,
-        .token.entity,
-        .token.url {
-            color: #67cdcc;
-        }
-
-        .token.important,
-        .token.bold {
-            font-weight: bold;
+        /* CodeMirror Height Fix */
+        .CodeMirror {
+            /* Enforce max height and allow internal scroll */
+            height: auto !important; 
+            min-height: 80px; 
+            max-height: 400px; /* REDUCED HEIGHT */
+            background: #2d2d30;
+            padding: 5px 0;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden; /* Important for containing the scroll */
         }
         
-        .token.italic {
-            font-style: italic;
+        .CodeMirror-scroll {
+            min-height: 80px;
+            max-height: 400px; /* Apply height limit here too */
+            overflow-y: auto !important; /* Force scrollbar inside editor when content exceeds max-height */
         }
 
-        .token.entity {
-            cursor: help;
+        /* OUTPUT FIX: Change text color to a bright, readable color */
+        .code-output {
+            /* Changed from #4caf50 to #a6e22e for better contrast */
+            color: #a6e22e !important; 
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border-top: 2px solid #667eea;
         }
 
-        .token.inserted {
-            color: green;
-        }
-        
-        .code-output::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .code-output::-webkit-scrollbar-track {
-            background: #2d2d2d;
-        }
-        
-        .code-output::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
-        }
-        
-        .code-output::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
-        }
-        
+        /* Responsive Styles */
         @media (max-width: 768px) {
             .code-runner-header {
                 flex-direction: column;
                 align-items: stretch !important;
             }
-            
             .code-runner-header > div {
                 width: 100%;
                 justify-content: center;
             }
-            
             .run-code-btn, .copy-code-btn {
                 flex: 1;
             }
         }
     `;
     document.head.appendChild(style);
-    
-    // Load Prism.js for syntax highlighting if not already loaded
-    if (!window.Prism) {
-        const prismScript = document.createElement('script');
-        prismScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js';
-        document.head.appendChild(prismScript);
-        
-        // Load language components
-        prismScript.onload = () => {
-            const langs = ['python', 'javascript', 'css', 'markup'];
-            langs.forEach(lang => {
-                const langScript = document.createElement('script');
-                langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
-                document.head.appendChild(langScript);
-            });
-        };
-    }
-    </script>
-
-</body>
+</script>
+x</body>
 </html>
