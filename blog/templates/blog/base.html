@@ -797,10 +797,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         }
     }
     </script>
- {% block extra_js %}{% endblock %}
-
-    <!-- Code Runner Script - Always loaded -->
-    <script>
+ <script>
     // Interactive Code Runner for Blog Posts
     document.addEventListener('DOMContentLoaded', function() {
         // Find all code blocks created by CKEditor's CodeSnippet plugin
@@ -864,7 +861,77 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
             line-height: 1.5;
             resize: vertical;
             outline: none;
+            tab-size: 4;
         `;
+        
+        // Add smart editor features
+        textarea.addEventListener('keydown', function(e) {
+            // Tab key - insert 4 spaces
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const spaces = '    '; // 4 spaces
+                
+                this.value = this.value.substring(0, start) + spaces + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + spaces.length;
+            }
+            
+            // Enter key - auto-indent
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const textBeforeCursor = this.value.substring(0, start);
+                const currentLine = textBeforeCursor.split('\n').pop();
+                
+                // Count leading spaces/tabs for indentation
+                const indent = currentLine.match(/^\s*/)[0];
+                
+                // Check if line ends with : or { for extra indent
+                const needsExtraIndent = currentLine.trim().endsWith(':') || 
+                                        currentLine.trim().endsWith('{') ||
+                                        currentLine.trim().endsWith('[') ||
+                                        currentLine.trim().endsWith('(');
+                
+                const newIndent = needsExtraIndent ? indent + '    ' : indent;
+                const newText = '\n' + newIndent;
+                
+                this.value = this.value.substring(0, start) + newText + this.value.substring(start);
+                this.selectionStart = this.selectionEnd = start + newText.length;
+            }
+            
+            // Auto-close brackets, quotes, parentheses
+            const pairs = {
+                '(': ')',
+                '[': ']',
+                '{': '}',
+                '"': '"',
+                "'": "'"
+            };
+            
+            if (pairs[e.key]) {
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                
+                // If text is selected, wrap it
+                if (start !== end) {
+                    e.preventDefault();
+                    const selectedText = this.value.substring(start, end);
+                    this.value = this.value.substring(0, start) + 
+                                e.key + selectedText + pairs[e.key] + 
+                                this.value.substring(end);
+                    this.selectionStart = start + 1;
+                    this.selectionEnd = end + 1;
+                } else {
+                    // Insert closing pair
+                    e.preventDefault();
+                    this.value = this.value.substring(0, start) + 
+                                e.key + pairs[e.key] + 
+                                this.value.substring(start);
+                    this.selectionStart = this.selectionEnd = start + 1;
+                }
+            }
+        });
         
         // Create header with language badge and buttons
         const header = document.createElement('div');
