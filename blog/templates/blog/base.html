@@ -810,6 +810,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
     </script>
 {% block extra_js %}
 {% endblock %}
+
 <script>
     // FINAL FIX: Uses CodeMirror for editable, colored code blocks.
     
@@ -839,7 +840,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         const lang = match[1].toLowerCase();
         if (lang === 'js') return 'javascript';
         if (lang === 'py') return 'python';
-        if (lang === 'html') return 'xml'; // Use CodeMirror's mode name
+        if (lang === 'html') return 'xml'; 
         return lang;
     }
 
@@ -960,10 +961,10 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         outputDiv.id = `output-${index}`;
         outputDiv.style.cssText = `
             background: #1e1e1e;
-            color: #4caf50;
+            color: #a6e22e; /* Inherited from CSS fix below */
             padding: 15px;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 12px; /* Set directly here for output div */
             white-space: pre-wrap;
             max-height: 300px;
             overflow-y: auto;
@@ -990,7 +991,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         editor.refresh();
     }
 
-    // --- Utility Functions (Copy/Run Code) --- (Not changed)
+    // --- Utility Functions (Copy/Run Code) --- 
     function copyToClipboard(text, button) {
         navigator.clipboard.writeText(text).then(() => {
             const originalText = button.innerHTML;
@@ -1010,7 +1011,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
 
     async function runCode(code, language, outputDiv, button) {
         outputDiv.style.display = 'block';
-        outputDiv.style.color = '#4caf50';
+        outputDiv.style.color = '#a6e22e';
         outputDiv.textContent = 'Running...';
         button.disabled = true;
         button.innerHTML = '⏳ Running...';
@@ -1049,7 +1050,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
             if (!response.ok) throw new Error('Failed to execute Python code');
             
             const result = await response.json();
-            outputDiv.style.color = result.run.stderr ? '#ff9800' : '#4caf50';
+            outputDiv.style.color = result.run.stderr ? '#ff9800' : '#a6e22e';
             outputDiv.textContent = result.run.output || result.run.stderr || 'Code executed successfully (no output)';
             
         } catch (error) {
@@ -1070,7 +1071,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         
         try {
             eval(code);
-            outputDiv.style.color = '#4caf50';
+            outputDiv.style.color = '#a6e22e';
             outputDiv.textContent = logs.length > 0 ? logs.join('\n') : 'Code executed successfully (no output)';
         } catch (error) {
             outputDiv.style.color = '#f44336';
@@ -1083,7 +1084,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
     }
 
     function runHTML(code, outputDiv) {
-        outputDiv.style.color = '#4caf50';
+        outputDiv.style.color = '#a6e22e';
         outputDiv.style.background = 'white';
         outputDiv.style.padding = '0';
         outputDiv.style.maxHeight = '500px';
@@ -1101,7 +1102,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         iframeDoc.close();
     }
 
-    // --- Final CSS Style Fix (Guarantees visible height and coloring) ---
+    // --- Final CSS Style Fix (Guarantees visible height and bright output) ---
     const style = document.createElement('style');
     style.textContent = `
         /* Custom Scrollbar Styles */
@@ -1110,30 +1111,30 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15
         .code-output::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
         .code-output::-webkit-scrollbar-thumb:hover { background: #764ba2; }
 
-        /* CodeMirror Height Fix */
+        /* CodeMirror Height Fix (SMALLER) */
         .CodeMirror {
-            /* Enforce max height and allow internal scroll */
+            /* Reduced max-height for a more compact editor */
             height: auto !important; 
             min-height: 80px; 
-            max-height: 400px; /* REDUCED HEIGHT */
+            max-height: 300px; /* NEW: Smaller Max Height */
             background: #2d2d30;
             padding: 5px 0;
             border-radius: 0 0 8px 8px;
-            overflow: hidden; /* Important for containing the scroll */
+            overflow: hidden; 
+            font-size: 12px; /* NEW: Smaller Code Text */
         }
         
         .CodeMirror-scroll {
             min-height: 80px;
-            max-height: 400px; /* Apply height limit here too */
-            overflow-y: auto !important; /* Force scrollbar inside editor when content exceeds max-height */
+            max-height: 300px; /* NEW: Smaller Max Height */
+            overflow-y: auto !important; 
         }
 
-        /* OUTPUT FIX: Change text color to a bright, readable color */
+        /* OUTPUT FIX: Change text color to bright green and reduce font size */
         .code-output {
-            /* Changed from #4caf50 to #a6e22e for better contrast */
             color: #a6e22e !important; 
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 12px; /* NEW: Smaller Output Text */
             white-space: pre-wrap;
             max-height: 300px;
             overflow-y: auto;
